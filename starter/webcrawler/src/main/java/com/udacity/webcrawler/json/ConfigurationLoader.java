@@ -1,6 +1,11 @@
 package com.udacity.webcrawler.json;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
 import java.io.Reader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -8,7 +13,7 @@ import java.util.Objects;
  * A static utility class that loads a JSON configuration file.
  */
 public final class ConfigurationLoader {
-
+  static ObjectMapper objectMapper = new ObjectMapper();
   private final Path path;
 
   /**
@@ -23,10 +28,13 @@ public final class ConfigurationLoader {
    *
    * @return the loaded {@link CrawlerConfiguration}.
    */
-  public CrawlerConfiguration load() {
-    // TODO: Fill in this method.
-
-    return new CrawlerConfiguration.Builder().build();
+  public CrawlerConfiguration load() throws IOException {
+    try(Reader reader = Files.newBufferedReader(path)){
+      return read(reader);
+    } catch (Exception e){
+      e.getLocalizedMessage();
+      return null;
+    }
   }
 
   /**
@@ -35,11 +43,16 @@ public final class ConfigurationLoader {
    * @param reader a Reader pointing to a JSON string that contains crawler configuration.
    * @return a crawler configuration
    */
-  public static CrawlerConfiguration read(Reader reader) {
+  public static CrawlerConfiguration read(Reader reader) throws IOException {
     // This is here to get rid of the unused variable warning.
-    Objects.requireNonNull(reader);
-    // TODO: Fill in this method
-
-    return new CrawlerConfiguration.Builder().build();
+    try{
+      Reader inputReader = Objects.requireNonNull(reader);
+      objectMapper.disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
+      return objectMapper.readValue(inputReader, CrawlerConfiguration.Builder.class)
+              .build();
+    } catch (Exception ex){
+        ex.getLocalizedMessage();
+        throw new RuntimeException(ex);
+    }
   }
 }
