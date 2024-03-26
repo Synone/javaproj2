@@ -69,6 +69,7 @@ final class ProfilerImpl implements Profiler {
     Path checkedPath = Objects.requireNonNull(path);
     try(FileWriter fileWriter = new FileWriter(checkedPath.toFile(),true)){
       writeData(fileWriter);
+      fileWriter.flush();
     } catch (IOException e) {
         throw new RuntimeException(e);
     }
