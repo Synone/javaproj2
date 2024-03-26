@@ -43,7 +43,7 @@ public final class InternalCrawlerTask extends RecursiveTask<Boolean> {
     }
 
     @Override
-    protected Boolean compute(){
+    protected synchronized Boolean compute(){
         if(maxDepth == 0 || clock.instant().isAfter((dueTime))){
             return false;
         }
@@ -52,12 +52,11 @@ public final class InternalCrawlerTask extends RecursiveTask<Boolean> {
                 return false;
             }
         }
-       synchronized (this){
-           if(urlsVisited.contains(url)){
+        if(urlsVisited.contains(url)){
                return false;
-           }
-           urlsVisited.add(url);
-       }
+        }
+        urlsVisited.add(url);
+
         PageParser.Result result = parserFactory.get(url).parse();
         for(ConcurrentMap.Entry<String, Integer> e: result.getWordCounts().entrySet()){
             counts.compute(e.getKey(),(k,v) -> (v == null) ? e.getValue() : e.getValue() +v);
